@@ -1,6 +1,6 @@
 # PiADXL345.jl
 
-Julia interface for [ADXL345](https://www.analog.com/en/products/adxl345.html)
+Julia interface for the [ADXL345](https://www.analog.com/en/products/adxl345.html)
 Accelerometer on Raspberry Pi.
 
 In the example below the ADXL345 is connected to the Raspberry Pi's GPIO header
