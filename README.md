@@ -3,8 +3,6 @@
 Julia interface for [ADXL345](https://www.analog.com/en/products/adxl345.html)
 Accelerometer on Raspberry Pi.
 
-![ADXL345 Module](https://components101.com/sites/default/files/component_pin/ADXL345-Pinout.jpg)
-
 In the example below the ADXL345 is connected to the Raspberry Pi's GPIO header
 as follows: CS = GPIO4, SDO = GPIO17, SDA = GPIO27, SCL = GPIO18.
 
@@ -34,3 +32,5 @@ Platform Info:
   LIBM: libm
   LLVM: libLLVM-9.0.1 (ORCJIT, arm1176jz-s)
 ```
+
+![ADXL345 Module](https://components101.com/sites/default/files/component_pin/ADXL345-Pinout.jpg)
