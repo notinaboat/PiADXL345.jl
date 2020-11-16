@@ -95,8 +95,8 @@ function Base.take!(adxl::ADXL345)
 end
 
 
-pitch_and_roll(v) = [atan(-v[1], sqrt(v[2]^2 + v[3]^2)) * 180 / π,
-                     atan(v[2], v[3]) * 180 / π]
+pitch_and_roll(v) = (pitch = atan(-v[1], sqrt(v[2]^2 + v[3]^2)) * 180 / π,
+                     roll = atan(v[2], v[3]) * 180 / π)
 
 
 function adxl_demo()
