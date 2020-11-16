@@ -1,0 +1,7 @@
+name = "PiADXL345"
+uuid = "0ca55b5e-7d6a-48ea-ae42-ee7e45b974f2"
+authors = ["notinaboat <notinaboat@icloud.com>"]
+version = "0.1.0"
+
+[deps]
+PiGPIOC = "30a511cb-78f8-4457-8440-9b2c99933694"
