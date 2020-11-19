@@ -1,5 +1,12 @@
 # This file is machine-generated - editing it directly is not advised
 
+[[BBSPI]]
+git-tree-sha1 = "a6708be04fb1cee8426b163f004d21815729d0c2"
+repo-rev = "master"
+repo-url = "../BBSPI"
+uuid = "d9c4ebee-6e29-4c04-a492-1c21dbbc648c"
+version = "0.1.0"
+
 [[PiGPIOC]]
 path = "../PiGPIOC"
 uuid = "30a511cb-78f8-4457-8440-9b2c99933694"

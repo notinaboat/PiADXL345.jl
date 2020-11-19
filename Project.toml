@@ -4,4 +4,5 @@ authors = ["notinaboat <notinaboat@icloud.com>"]
 version = "0.1.0"
 
 [deps]
+BBSPI = "d9c4ebee-6e29-4c04-a492-1c21dbbc648c"
 PiGPIOC = "30a511cb-78f8-4457-8440-9b2c99933694"
