@@ -8,26 +8,15 @@ export adxl_open
 
 using BBSPI
 
-using PiGPIOC
-import PiGPIOC.gpioInitialise
-import PiGPIOC.gpioDelay
-import PiGPIOC.gpioSetMode
-import PiGPIOC.gpioRead
-import PiGPIOC.gpioWrite
+using PiGPIOMEM
 
-struct Pin
-    pin::UInt8
+struct ActiveLowPin
+    pin::GPIOPin
 end
-Base.setindex!(p::Pin, v) = gpioWrite(p.pin, v)
-Base.getindex(p::Pin) = gpioRead(p.pin)
+Base.setindex!(p::ActiveLowPin, v) = p.pin[] = iszero(v) ? 1 : 0
+Base.getindex(p::ActiveLowPin) = iszero(p.pin[])
 
-struct NPin
-    pin::UInt8
-end
-Base.setindex!(p::NPin, v) = gpioWrite(p.pin, v == 0 ? 1 : 0)
-Base.getindex(p::NPin) = gpioRead(p.pin) == 0 ? 1 : 0
-
-BBSPI.delay(s::BBSPI.SPISlave) = gpioDelay(10)
+BBSPI.delay(s::BBSPI.SPISlave) = PiGPIOMEM.spin(10)
 
 
 struct ADXL345{T} <: AbstractChannel{Vector{UInt16}}
@@ -36,29 +25,22 @@ end
 
 
 """
-    adxl_open(;cs=4, sdo=17, sda=27, scl=18)::ADXL345
+    adxl_open(;cs=chip select output pin,
+              sdo=master input pin,
+              sda=master output pin,
+              scl=clock output pin)::ADXL345
 
 Open ADXL345 conencted to GPIO pins `cs`, `sdo`, `sda` and `scl`.
+
+Methods must be defined for `setindex!(::PinType, v)` and `getindex(::PinType)`.
+See `help?> SPISlave`.
 """
-function adxl_open(;cs=4, sdo=17, sda=27, scl=18)
+function adxl_open(;cs=nothing, scl=nothing, sda=nothing, sdo=nothing)
 
-    res = gpioInitialise();
-    @assert(res != PiGPIOC.PI_INIT_FAILED)
-
-    gpioSetMode(cs, PiGPIOC.PI_OUTPUT)
-    gpioSetMode(scl, PiGPIOC.PI_OUTPUT)
-    gpioSetMode(sda, PiGPIOC.PI_OUTPUT)
-
-    for p in sdo
-        gpioSetMode(p, PiGPIOC.PI_INPUT)
-    end
-
-    spi = BBSPI.SPISlave(cs=NPin(cs),
-                         clk=NPin(scl),
-                         mosi=Pin(sda),
-                         miso=[Pin(p) for p in sdo])
-
-    adxl_open(spi)
+    adxl_open(BBSPI.SPISlave(cs=ActiveLowPin(cs),
+                             clk=ActiveLowPin(scl),
+                             mosi=sda,
+                             miso=sdo))
 end
 
 
@@ -81,6 +63,9 @@ adxl_is_connected(spi) = all(adxl_read(spi, 0) .== 0xE5) # DEVID [1, p15]
 adxl_enable(spi) = adxl_write(spi, 0x2D, 0b00001000) # POWER_CTL [1, p16]
 
 adxl_bw_rate_12hz5(spi) = adxl_write(spi, 0x2C, 0b00000111) # BW_RATE [1, p16]
+adxl_bw_rate_25hz(spi)  = adxl_write(spi, 0x2C, 0b00001000) # BW_RATE [1, p16]
+adxl_bw_rate_50hz(spi)  = adxl_write(spi, 0x2C, 0b00001001) # BW_RATE [1, p16]
+adxl_bw_rate_100hz(spi) = adxl_write(spi, 0x2C, 0b00001010) # BW_RATE [1, p16]
 
 
 """
@@ -117,9 +102,9 @@ Read [x,y,z] vector from ADXL345.
 function Base.take!(adxl::ADXL345)
 
     v = adxl_read(adxl.spi, 0x32, 6) # DATAX0... Register [1, p18]
-    x = signed.((|).(v[1,:], (<<).(UInt16.(v[2,:]), 8)))
-    y = signed.((|).(v[3,:], (<<).(UInt16.(v[4,:]), 8)))
-    z = signed.((|).(v[5,:], (<<).(UInt16.(v[6,:]), 8)))
+    x = @. signed(v[1,:] | UInt16(v[2,:]) << 8)
+    y = @. signed(v[3,:] | UInt16(v[4,:]) << 8)
+    z = @. signed(v[5,:] | UInt16(v[6,:]) << 8)
     vcat(permutedims.([x, y, z])...)
 end
 
@@ -129,13 +114,18 @@ pitch_and_roll(v) = (pitch = atan(-v[1], hypot(v[2], v[3])) * 180 / π,
 
 
 function adxl_demo()
-    #adxl = adxl_open(cs=4, sdo=17, sda=27, scl=18)
-    adxl = adxl_open(cs=4, sdo=[17,17], sda=27, scl=18)
+    adxl = adxl_open(cs=GPIOPin(4; output=true),
+                     scl=GPIOPin(18; output=true),
+                     sda=GPIOPin(27; output=true),
+                     sdo=GPIOPin(17))
+    #adxl = adxl_open(cs=4, sdo=[17,17], sda=27, scl=18)
 
     while true
         t = time()
         for v in eachcol(take!(adxl))
-            @show pitch_and_roll(v)
+            pr = pitch_and_roll(v)
+            print(round(pr.pitch; digits=3), " ",
+                  round(pr.roll; digits=3), "      \r")
         end
         sleep(max(0, 0.08 - (time() - t)))
     end

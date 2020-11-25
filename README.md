@@ -9,8 +9,12 @@ as follows: CS = GPIO4, SDO = GPIO17, SDA = GPIO27, SCL = GPIO18.
 ```julia
 julia> using PiADXL345
 
-julia> adxl = adxl_open(cs=4, sdo=17, sda=27, scl=18)
-PiADXL345.ADXL345(0x04)
+julia> using PiGPIOMEM
+
+julia> adxl = adxl_open(cs=GPIOPin(4; output=true),
+                        scl=GPIOPin(18; output=true),
+                        sda=GPIOPin(27; output=true),
+                        sdo=GPIOPin(17))
 
 julia> v = take!(adxl)
 3-element Array{Int64,1}:

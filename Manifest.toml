@@ -7,7 +7,13 @@ repo-url = "../BBSPI"
 uuid = "d9c4ebee-6e29-4c04-a492-1c21dbbc648c"
 version = "0.1.0"
 
-[[PiGPIOC]]
-path = "../PiGPIOC"
-uuid = "30a511cb-78f8-4457-8440-9b2c99933694"
+[[Mmap]]
+uuid = "a63ad114-7e13-5084-954f-fe012c677804"
+
+[[PiGPIOMEM]]
+deps = ["Mmap"]
+git-tree-sha1 = "724f1ba2b9b9bef0005ab4316e81948db2b74454"
+repo-rev = "master"
+repo-url = "../PiGPIOMEM"
+uuid = "1cdbf0ad-f496-4de0-97e4-602941adc73e"
 version = "0.1.0"
