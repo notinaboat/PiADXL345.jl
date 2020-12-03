@@ -17,10 +17,7 @@ julia> adxl = adxl_open(cs=GPIOPin(4; output=true),
                         sdo=GPIOPin(17))
 
 julia> v = take!(adxl)
-3-element Array{Int64,1}:
-  144
-  123
- -181
+(-0.73828125, -0.16015625, 0.65625)
 
 julia> v = PiADXL345.pitch_and_roll(take!(adxl))
 (pitch = 0.9572953530227399, roll = 55.38053437654027)
